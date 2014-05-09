@@ -1,5 +1,5 @@
 var version = "SpaceClicker v0.0.1";
-var stash = {dust:0,bricks:0,minerals:0,metal:0};
+var stash = {dust:0,bricks:10,minerals:10,metal:0, robots:0, scrapers:0};
 
 console.log( version );
 
@@ -12,9 +12,11 @@ function randomInt(min,max) {
     return Math.floor(Math.random()*(max-min+1)+min);
 };
 
+
 function update() {
-	$("#dust").text(stash["dust"] + " dust");
+	var count = 0;
 	for(key in stash) {
+		count += stash[key];
 		if (stash[key] > 0) {
 		  $("#"+key).text(stash[key] + " " + key);
 		}
@@ -22,28 +24,56 @@ function update() {
 		  $("#"+key).text("");
 		};
 	};
+	if (count == 0) { $("#dust").text("nothing");};
+	$("#dust").append((" <a href='#' onClick='scrape()'>Scrape</a>"));
+	if (stash["dust"] >= 5) {
+		$("#dust").append((" <a href='#' onClick='compact()'>Compact (-5 dust)</a>"));
+		};
+	if (stash["minerals"] >= 10) {
+		$("#minerals").append((" <a href='#' onClick='refine()'> Refine (-10 minerals)</a>"));
+		};
+	if (stash["metal"] >= 1) {
+		$("#metal").append((" <a href='#' onClick='brobot()'> Build robot (-1 metal)</a>"));
+		};			
+	if ((stash["bricks"] >= 10) && (stash["robots"] >= 1)) {
+		$("#bricks").append((" <a href='#' onClick='bscraper()'> Build scraper (-10 bricks, -1 robot)</a>"));
+		};
 
-	if(stash["dust"] < 5) {$("#compactlink").hide();} else {$("#compactlink").show();};
-	if(stash["minerals"] < 10) {$("#refinelink").hide();} else {$("#refinelink").show();};
 };
 
 function scrape(){	
-	stash["dust"] = stash["dust"] + 1;
+	stash["dust"]++;
 	var rnd = randomInt(1,5);
     if (rnd==5) {
-		stash["minerals"] = stash["minerals"]	+ 1;
+		stash["minerals"]++;
     };
 	update();
 };
 
 function compact(){
-	stash["dust"] = stash["dust"] - 5;
-	stash["bricks"] = stash["bricks"] + 1;
+	stash["dust"] -= 5;
+	stash["bricks"]++;
 	update();
 };
 
 function refine(){
-	stash["minerals"] = stash["minerals"] - 10;
-	stash["metal"] = stash["metal"] + 1;
+	stash["minerals"] -= 10;
+	stash["metal"]++;
 	update();
+};
+
+function brobot() {
+	stash["metal"]--;
+	stash["robots"]++;
+	update();
+};
+
+function bscraper() {
+	stash["robots"]--;
+	stash["bricks"] -= 10;
+	stash["scrapers"]++;
+	setInterval(function(){
+		scrape();
+		update();
+	},1000);
 };
